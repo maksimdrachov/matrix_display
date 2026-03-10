@@ -4,13 +4,80 @@ Matrix Display is a 10x118 LED matrix display that can be used for displaying me
 
 ## Usage
 
-The eventual user-facing CLI is intended to work like this:
-
 ```sh
 echo "Some message" | matrix_display
 ```
 
-The current implementation provides the Art-Net transport layer and a calibration test for the PixLite 16 MK2.
+`matrix_display` reads a message from standard input, renders it with a built-in bitmap
+font, and sends the corresponding Art-Net frames directly to the PixLite controller.
+
+If the rendered message fits within `118` pixels, it is centered. If it is wider than
+`118` pixels, it scrolls once and then leaves the last visible slice on screen. The
+PixLite is expected to be configured to hold the last received frame.
+
+Use the command directly from the repo:
+
+```sh
+./matrix_display
+```
+
+Or create a symlink somewhere on your `PATH`, for example:
+
+```sh
+ln -s ~/matrix_display/matrix_display /usr/local/bin/matrix_display
+```
+
+Make sure `~/.local/bin` is on your `PATH`.
+
+If you prefer not to install anything, this also works:
+
+```sh
+PYTHONPATH=src python3 -m matrix_display
+```
+
+To use `matrix_display`, provide a `~/.matrix_display` config file:
+
+```toml
+controller_ip = "192.168.1.201"
+```
+
+Controller IP resolution uses this precedence:
+
+1. `--controller-ip`
+2. `MATRIX_DISPLAY_TARGET_IP`
+3. `~/.matrix_display`
+4. built-in default `192.168.1.201`
+
+ANSI color sequences in stdin are supported. For example:
+
+```sh
+printf '\033[31mRED \033[32mGREEN\033[0m\n' | matrix_display
+```
+
+## Example Usage
+
+Display the current time in 24-hour format once a second:
+
+```sh
+#!/bin/sh
+
+while true; do
+  date '+%H:%M:%S' | matrix_display
+  sleep 1
+done
+```
+
+Watch the latest GitHub Actions run and display a green or red result when it finishes:
+
+```sh
+#!/usr/bin/env bash
+
+if gh run watch --exit-status; then
+  printf '\033[32mPASSED\033[0m\n' | matrix_display
+else
+  printf '\033[31mFAILED\033[0m\n' | matrix_display
+fi
+```
 
 ## Development
 
@@ -22,6 +89,10 @@ The current implementation provides the Art-Net transport layer and a calibratio
 - `OUT10` -> row `9` -> universe `10`
 
 Each output carries `118` RGB pixels (`354` DMX channels).
+Rows are mirrored during serialization so logical column `0` appears on the left edge
+of the physical display.
+
+## Testing
 
 Run the unit tests:
 

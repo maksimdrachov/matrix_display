@@ -85,7 +85,19 @@ class LedControllerTests(unittest.TestCase):
 
         payloads = self.controller.push_frame(frame)
 
-        self.assertEqual(bytearray([255, 32, 16]), payloads[0][:3])
+        self.assertEqual(bytearray([255, 32, 16]), payloads[0][-3:])
+
+    def test_push_frame_mirrors_rows_before_serializing(self) -> None:
+        row = [(0, 0, 0)] * MATRIX_WIDTH
+        mutable_row = list(row)
+        mutable_row[0] = (255, 0, 0)
+        mutable_row[-1] = (0, 255, 0)
+        frame = tuple(tuple(mutable_row) for _ in range(MATRIX_HEIGHT))
+
+        payloads = self.controller.push_frame(frame)
+
+        self.assertEqual(bytearray([0, 255, 0]), payloads[0][:3])
+        self.assertEqual(bytearray([255, 0, 0]), payloads[0][-3:])
 
     def test_push_frame_rejects_wrong_row_count(self) -> None:
         frame = [

@@ -46,6 +46,7 @@ class LedController:
     target_ip: str = DEFAULT_TARGET_IP
     universes: Sequence[int] | None = None
     fps: int = 30
+    mirror_x: bool = True
     artnet_client_factory: ArtNetClientFactory | None = None
     _clients: tuple[ArtNetClient, ...] = field(init=False, repr=False)
 
@@ -80,7 +81,8 @@ class LedController:
                     f"expected {MATRIX_WIDTH} columns in row {row_index}, got {len(row)}"
                 )
             payload = bytearray()
-            for pixel in row:
+            pixels = reversed(row) if self.mirror_x else row
+            for pixel in pixels:
                 payload.extend(_normalize_pixel(pixel))
             payloads.append(payload)
         return tuple(payloads)

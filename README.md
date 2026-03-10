@@ -85,6 +85,20 @@ else
 fi
 ```
 
+Display a very long scrolling `ZUBAX` banner and refresh it every few minutes after
+the scroll has finished:
+
+```sh
+#!/bin/sh
+
+text=$(printf 'ZUBAX %.0s' $(seq 1 100))
+
+while true; do
+  printf '\033[31m%s\033[0m\n' "$text" | matrix_display -t maksim
+  sleep 2m
+done
+```
+
 ## Development
 
 `LedController` maps the matrix rows to 10 Art-Net universes, one per output:

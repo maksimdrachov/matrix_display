@@ -1,11 +1,11 @@
 # Matrix Display
 
-Matrix Display is a 10x118 LED matrix display that can be used for displaying messages.
+`matrix_display` is a CLI tool that can be used to display terminal output on an LED wall.
 
 ## Usage
 
 ```sh
-echo "Some message" | matrix_display
+echo "Some message" | matrix_display --target maksim
 ```
 
 `matrix_display` reads a message from standard input, renders it with a built-in bitmap
@@ -24,7 +24,7 @@ Use the command directly from the repo:
 Or create a symlink somewhere on your `PATH`, for example:
 
 ```sh
-ln -s ~/matrix_display/matrix_display /usr/local/bin/matrix_display
+ln -s ~/matrix_display/matrix_display ~/.local/bin/matrix_display
 ```
 
 Make sure `~/.local/bin` is on your `PATH`.
@@ -38,20 +38,26 @@ PYTHONPATH=src python3 -m matrix_display
 To use `matrix_display`, provide a `~/.matrix_display` config file:
 
 ```toml
+[[display]]
+target_display = "maksim"
 controller_ip = "192.168.1.201"
+
+[[display]]
+target_display = "meeting_room"
+controller_ip = "192.168.1.202"
 ```
 
-Controller IP resolution uses this precedence:
+Use `--target` or `-t` to select which configured display to send to:
 
-1. `--controller-ip`
-2. `MATRIX_DISPLAY_TARGET_IP`
-3. `~/.matrix_display`
-4. built-in default `192.168.1.201`
+```sh
+echo "Some message" | matrix_display --target maksim
+echo "Some message" | matrix_display -t maksim
+```
 
 ANSI color sequences in stdin are supported. For example:
 
 ```sh
-printf '\033[31mRED \033[32mGREEN\033[0m\n' | matrix_display
+printf '\033[31mRED \033[32mGREEN\033[0m\n' | matrix_display -t maksim
 ```
 
 ## Example Usage
@@ -62,7 +68,7 @@ Display the current time in 24-hour format once a second:
 #!/bin/sh
 
 while true; do
-  date '+%H:%M:%S' | matrix_display
+  date '+%H:%M:%S' | matrix_display -t maksim
   sleep 1
 done
 ```
@@ -73,9 +79,9 @@ Watch the latest GitHub Actions run and display a green or red result when it fi
 #!/usr/bin/env bash
 
 if gh run watch --exit-status; then
-  printf '\033[32mPASSED\033[0m\n' | matrix_display
+  printf '\033[32mPASSED\033[0m\n' | matrix_display -t maksim
 else
-  printf '\033[31mFAILED\033[0m\n' | matrix_display
+  printf '\033[31mFAILED\033[0m\n' | matrix_display -t maksim
 fi
 ```
 
@@ -106,4 +112,6 @@ Display the calibration frame on the controller at `192.168.1.201`:
 MATRIX_DISPLAY_RUN_HARDWARE_TESTS=1 PYTHONPATH=src python3 -m unittest tests.test_calibration
 ```
 
-You can override the target universes with `MATRIX_DISPLAY_UNIVERSES=1,2,3,4,5,6,7,8,9,10` and the target IP with `MATRIX_DISPLAY_TARGET_IP=192.168.1.201`.
+For the calibration test only, you can override the target universes with
+`MATRIX_DISPLAY_UNIVERSES=1,2,3,4,5,6,7,8,9,10` and the controller IP with
+`MATRIX_DISPLAY_TARGET_IP=192.168.1.201`.

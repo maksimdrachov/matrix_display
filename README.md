@@ -1,11 +1,17 @@
 <div align="center">
   <img src="./images/matrix_display.png" alt="matrix_display">
-      
-_CLI tool to display terminal output on an LED wall_
+
+  <h1>matrix_display</h1>
+
+  <p><em>CLI tool to display terminal output on an LED wall</em></p>
+
+  <p><a href="https://x.com/maksimdrachov/status/2031714045334532190">🎥 Demo video</a></p>
 
 </div>
 
 ---
+
+
 
 ## Hardware
 

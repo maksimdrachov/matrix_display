@@ -7,6 +7,17 @@ _CLI tool to display terminal output on an LED wall_
 
 ---
 
+## Hardware
+
+- [Pixlite 16 Mk2](https://www.advateklighting.com/products/shop/pixlite-16-mk2)
+- [LED strips](https://www.amazon.de/-/en/SEZO-Individually-Addressable-Non-Waterproof-Decoration/dp/B09N99DJRG)
+- [Aluminium profile](https://www.amazon.de/-/en/StarlandLED-aluminium-accessories-perfectly-LightStrip/dp/B07MPX3WHM) 
+- [3-wire cable](https://www.amazon.de/BTF-LIGHTING-SK6812RGBW-Electric-Extension-Connection/dp/B07S8CLRLK)
+- [3-pin connectors](https://www.amazon.de/BTF-LIGHTING-Connectors-WS2812B-WS2811-20pairs-10-pairs/dp/B01DC0KIT2)
+- [Brackets](https://www.printables.com/model/1633891-matrix_display-brackets) (3d-printed)
+
+Note: you could make this significantly cheaper by designing your own LED driver board (which is left as an exercise to the reader).
+
 ## Installation
 
 1. Clone the repo:

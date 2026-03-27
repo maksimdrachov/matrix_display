@@ -7,7 +7,8 @@ name = "matrix-display"
 version = "0.1.0"
 description = "Art-Net controller for a 10x118 LED matrix display"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
+dependencies = []
 
 [project.scripts]
 matrix_display = "matrix_display.cli:main"

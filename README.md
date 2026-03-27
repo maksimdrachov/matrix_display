@@ -40,22 +40,10 @@ ln -s ~/matrix_display/matrix_display ~/.local/bin/matrix_display
 
 Make sure `~/.local/bin` is on your `PATH`.
 
-3. Create a `~/.matrix_display` config file:
-
-```toml
-[[display]]
-target_display = "maksim"
-controller_ip = "192.168.1.201"
-
-[[display]]
-target_display = "meeting_room"
-controller_ip = "192.168.1.202"
-```
-
-4. Send a message:
+3. Send a message:
 
 ```sh
-echo "Some message" | matrix_display --target maksim
+echo "Some message" | matrix_display --target 192.168.1.201
 ```
 
 ## Usage
@@ -73,17 +61,17 @@ If you prefer not to install anything, this also works:
 PYTHONPATH=src python3 -m matrix_display
 ```
 
-Use `--target` or `-t` to select which configured display to send to:
+Use `--target` or `-t` to specify the controller IP or hostname:
 
 ```sh
-some_command | matrix_display --target maksim
-some_command | matrix_display -t maksim
+some_command | matrix_display --target 192.168.1.201
+some_command | matrix_display -t my-display.local
 ```
 
 ANSI color sequences in stdin are supported. For example:
 
 ```sh
-printf '\033[31mRED \033[32mGREEN\033[0m\n' | matrix_display -t maksim
+printf '\033[31mRED \033[32mGREEN\033[0m\n' | matrix_display -t 192.168.1.201
 ```
 
 ## Example Usage
@@ -94,7 +82,7 @@ Display the current time in 24-hour format once a second:
 #!/bin/sh
 
 while true; do
-  date '+%H:%M:%S' | matrix_display -t maksim
+  date '+%H:%M:%S' | matrix_display -t 192.168.1.201
   sleep 1
 done
 ```
@@ -105,9 +93,9 @@ Watch the latest GitHub Actions run and display a green or red result when it fi
 #!/usr/bin/env bash
 
 if gh run watch --exit-status; then
-  printf '\033[32mPASSED\033[0m\n' | matrix_display -t maksim
+  printf '\033[32mPASSED\033[0m\n' | matrix_display -t 192.168.1.201
 else
-  printf '\033[31mFAILED\033[0m\n' | matrix_display -t maksim
+  printf '\033[31mFAILED\033[0m\n' | matrix_display -t 192.168.1.201
 fi
 ```
 
@@ -120,7 +108,7 @@ the scroll has finished:
 text=$(printf 'ZUBAX %.0s' $(seq 1 100))
 
 while true; do
-  printf '\033[31m%s\033[0m\n' "$text" | matrix_display -t maksim
+  printf '\033[31m%s\033[0m\n' "$text" | matrix_display -t 192.168.1.201
   sleep 2m
 done
 ```

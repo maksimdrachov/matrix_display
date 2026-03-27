@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import io
-import tempfile
 import unittest
-from pathlib import Path
 
 from matrix_display.cli import main
 
@@ -27,7 +25,7 @@ class FakeLedController:
 
 
 class CliTests(unittest.TestCase):
-    def test_main_renders_stdin_and_uses_selected_target(self) -> None:
+    def test_main_renders_stdin_to_target(self) -> None:
         created: list[FakeLedController] = []
 
         def factory(*, target_ip: str) -> FakeLedController:
@@ -35,23 +33,15 @@ class CliTests(unittest.TestCase):
             created.append(controller)
             return controller
 
-        with tempfile.TemporaryDirectory() as directory:
-            config_path = Path(directory) / "matrix_display.toml"
-            config_path.write_text(
-                "[[display]]\n"
-                'target_display = "maksim"\n'
-                'controller_ip = "192.168.1.201"\n',
-                encoding="utf-8",
-            )
-            stderr = io.StringIO()
+        stderr = io.StringIO()
 
-            result = main(
-                ["--config", str(config_path), "--target", "maksim"],
-                stdin=io.StringIO("Hello\n"),
-                controller_factory=factory,
-                sleep=lambda _: None,
-                stderr=stderr,
-            )
+        result = main(
+            ["--target", "192.168.1.201"],
+            stdin=io.StringIO("Hello\n"),
+            controller_factory=factory,
+            sleep=lambda _: None,
+            stderr=stderr,
+        )
 
         self.assertEqual(0, result)
         self.assertEqual("", stderr.getvalue())
@@ -60,66 +50,26 @@ class CliTests(unittest.TestCase):
         self.assertTrue(created[0].closed)
 
     def test_main_accepts_short_target_flag(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            config_path = Path(directory) / "matrix_display.toml"
-            config_path.write_text(
-                "[[display]]\n"
-                'target_display = "maksim"\n'
-                'controller_ip = "192.168.1.201"\n',
-                encoding="utf-8",
-            )
-
-            result = main(
-                ["--config", str(config_path), "-t", "maksim"],
-                stdin=io.StringIO("Hello\n"),
-                controller_factory=lambda **_: FakeLedController("192.168.1.201"),
-                sleep=lambda _: None,
-                stderr=io.StringIO(),
-            )
+        result = main(
+            ["-t", "192.168.1.201"],
+            stdin=io.StringIO("Hello\n"),
+            controller_factory=lambda **_: FakeLedController("192.168.1.201"),
+            sleep=lambda _: None,
+            stderr=io.StringIO(),
+        )
 
         self.assertEqual(0, result)
 
-    def test_main_rejects_unknown_target(self) -> None:
-        stderr = io.StringIO()
-
-        with tempfile.TemporaryDirectory() as directory:
-            config_path = Path(directory) / "matrix_display.toml"
-            config_path.write_text(
-                "[[display]]\n"
-                'target_display = "maksim"\n'
-                'controller_ip = "192.168.1.201"\n',
-                encoding="utf-8",
-            )
-
-            result = main(
-                ["--config", str(config_path), "--target", "office"],
-                stdin=io.StringIO("Hello\n"),
-                controller_factory=lambda **_: FakeLedController("192.168.1.201"),
-                sleep=lambda _: None,
-                stderr=stderr,
-            )
-
-        self.assertEqual(1, result)
-        self.assertIn("target display 'office' was not found", stderr.getvalue())
-
     def test_main_rejects_empty_messages(self) -> None:
         stderr = io.StringIO()
-        with tempfile.TemporaryDirectory() as directory:
-            config_path = Path(directory) / "matrix_display.toml"
-            config_path.write_text(
-                "[[display]]\n"
-                'target_display = "maksim"\n'
-                'controller_ip = "192.168.1.201"\n',
-                encoding="utf-8",
-            )
 
-            result = main(
-                ["--config", str(config_path), "--target", "maksim"],
-                stdin=io.StringIO("\n"),
-                controller_factory=lambda **_: FakeLedController("192.168.1.201"),
-                sleep=lambda _: None,
-                stderr=stderr,
-            )
+        result = main(
+            ["--target", "192.168.1.201"],
+            stdin=io.StringIO("\n"),
+            controller_factory=lambda **_: FakeLedController("192.168.1.201"),
+            sleep=lambda _: None,
+            stderr=stderr,
+        )
 
         self.assertEqual(1, result)
         self.assertIn("expected a message on stdin", stderr.getvalue())

@@ -6,10 +6,8 @@ import argparse
 import math
 import sys
 import time
-from pathlib import Path
 from typing import Callable, TextIO
 
-from .config import DEFAULT_CONFIG_PATH, resolve_controller_ip
 from .led_controller import LedController
 from .rendering import normalize_input_text, render_message
 
@@ -30,7 +28,7 @@ def main(
 
     try:
         message = _read_message(stdin or sys.stdin)
-        controller_ip = resolve_controller_ip(args.target, config_path=args.config)
+        controller_ip = args.target
         rendered = render_message(message)
         controller = controller_factory(target_ip=controller_ip)
         frame_interval = 1 / getattr(controller, "fps", 30)
@@ -64,13 +62,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "-t",
         "--target",
         required=True,
-        help="Named target display from ~/.matrix_display.",
-    )
-    parser.add_argument(
-        "--config",
-        type=Path,
-        default=DEFAULT_CONFIG_PATH,
-        help=f"Path to the TOML config file (default: {DEFAULT_CONFIG_PATH}).",
+        help="IP address or hostname of the PixLite controller.",
     )
     return parser
 

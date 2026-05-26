@@ -3,17 +3,15 @@
 from __future__ import annotations
 
 import argparse
-import math
 import sys
 import time
 from pathlib import Path
 from typing import Callable, TextIO
 
 from .config import DEFAULT_CONFIG_PATH, resolve_controller_ip
+from .display import display_text
 from .led_controller import LedController
-from .rendering import normalize_input_text, render_message
-
-DEFAULT_HOLD_SECONDS = 0.5
+from .rendering import normalize_input_text
 
 
 def main(
@@ -31,23 +29,12 @@ def main(
     try:
         message = _read_message(stdin or sys.stdin)
         controller_ip = resolve_controller_ip(args.target, config_path=args.config)
-        rendered = render_message(message)
-        controller = controller_factory(target_ip=controller_ip)
-        frame_interval = 1 / getattr(controller, "fps", 30)
-        hold_frames = max(
-            1, math.ceil(getattr(controller, "fps", 30) * DEFAULT_HOLD_SECONDS)
+        display_text(
+            message,
+            target_ip=controller_ip,
+            controller_factory=controller_factory,
+            sleep=sleep,
         )
-
-        try:
-            for frame in rendered.frames:
-                controller.push_frame(frame)
-                sleep(frame_interval)
-
-            for _ in range(hold_frames):
-                controller.push_frame(rendered.final_frame)
-                sleep(frame_interval)
-        finally:
-            controller.close()
     except ValueError as error:
         error_stream.write(f"matrix_display: {error}\n")
         return 1

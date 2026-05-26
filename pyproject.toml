@@ -9,8 +9,12 @@ description = "Art-Net controller for a 10x118 LED matrix display"
 readme = "README.md"
 requires-python = ">=3.12"
 
+[project.optional-dependencies]
+cyphal = ["pycyphal2[udp]>=2.0.0.dev2"]
+
 [project.scripts]
 matrix_display = "matrix_display.cli:main"
+matrix_display_cyphal = "matrix_display.cyphal_daemon:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

@@ -36,6 +36,7 @@ git clone git@github.com:maksimdrachov/matrix_display.git ~/matrix_display
 
 ```sh
 ln -s ~/matrix_display/matrix_display ~/.local/bin/matrix_display
+ln -s ~/matrix_display/matrix_display_cyphal ~/.local/bin/matrix_display_cyphal
 ```
 
 Make sure `~/.local/bin` is on your `PATH`.
@@ -56,6 +57,12 @@ controller_ip = "192.168.1.202"
 
 ```sh
 echo "Some message" | matrix_display --target maksim
+```
+
+To use the PyCyphal daemon, install the optional UDP dependencies:
+
+```sh
+python3 -m pip install -e 'pycyphal2[udp]'
 ```
 
 ## Usage
@@ -84,6 +91,31 @@ ANSI color sequences in stdin are supported. For example:
 
 ```sh
 printf '\033[31mRED \033[32mGREEN\033[0m\n' | matrix_display -t maksim
+```
+
+## PyCyphal Daemon
+
+`matrix_display_cyphal` runs a background subscriber that listens for UTF-8 text
+messages and sends them to the same renderer/controller path used by the terminal
+CLI.
+
+```sh
+matrix_display_cyphal --target maksim
+```
+
+By default, this creates a PyCyphal/UDP node with home `matrix_display_<target>` and
+subscribes to `~/text`. For `--target maksim`, the resolved topic is
+`matrix_display_maksim/text`, matching a daemon configured as:
+
+```python
+node = Node.new(UDPTransport.new(), home="matrix_display_maksim", namespace="")
+sub = node.subscribe("~/text")
+```
+
+You can override the Cyphal settings if needed:
+
+```sh
+matrix_display_cyphal --target maksim --home matrix_display_maksim --topic '~/text'
 ```
 
 ## Example Usage
